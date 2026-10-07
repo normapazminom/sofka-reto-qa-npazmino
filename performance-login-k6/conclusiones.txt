@@ -1,0 +1,25 @@
+CONCLUSIONES - PRUEBA DE CARGA LOGIN (fakestoreapi.com)
+
+(Completar con los resultados reales después de ejecutar la prueba)
+
+1. Configuración ejecutada
+   - TPS objetivo: 20 | Duración: ____ | VUs usados (máx.): ____
+   - Fecha/hora: ____ | Versión de k6: ____
+
+2. Resultados
+   - Total de peticiones: ____
+   - TPS alcanzado (http_reqs): ____
+   - Tiempo de respuesta: promedio ____ ms | p90 ____ ms | p95 ____ ms | máx. ____ ms
+   - Tasa de error (http_req_failed): ____ %
+   - Checks exitosos: ____ %
+
+3. Validación de criterios
+   - TPS >= 20: CUMPLE / NO CUMPLE
+   - Tiempo de respuesta <= 1,5 s: CUMPLE / NO CUMPLE
+   - Error < 3%: CUMPLE / NO CUMPLE
+
+4. Hallazgos
+   - ____
+
+5. Conclusiones y recomendaciones
+   - ____
