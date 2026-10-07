@@ -1,25 +1,70 @@
-CONCLUSIONES - PRUEBA DE CARGA LOGIN (fakestoreapi.com)
+CONCLUSIONES - PRUEBA DE CARGA DEL SERVICIO DE LOGIN
+Servicio: POST https://fakestoreapi.com/auth/login
+Herramienta: k6 v2.2.0 (Windows, amd64) | Fecha: 07/10/2026
 
-(Completar con los resultados reales después de ejecutar la prueba)
+1. ESCENARIO EJECUTADO
+   - Ejecutor: constant-arrival-rate (ritmo fijo de peticiones por segundo).
+   - Duración: 2 minutos por corrida, con 30 a 100 VUs disponibles.
+   - Datos: 5 usuarios del archivo data/users.csv, usados de forma rotativa.
+   - Se realizaron dos corridas: 20 TPS (mínimo exigido) y 25 TPS (con margen).
 
-1. Configuración ejecutada
-   - TPS objetivo: 20 | Duración: ____ | VUs usados (máx.): ____
-   - Fecha/hora: ____ | Versión de k6: ____
+2. RESULTADOS
+                               Corrida 1 (20 TPS)   Corrida 2 (25 TPS)
+   Total de peticiones         2.400                3.000
+   TPS alcanzado               19,93/s              24,94/s
+   Tiempo promedio             365 ms               356 ms
+   Tiempo p90                  410 ms               390 ms
+   Tiempo p95                  484 ms               416 ms
+   Tiempo máximo               1,42 s               985 ms
+   Peticiones fallidas         0,00% (0/2400)       0,00% (0/3000)
+   Peticiones > 1,5 s          0,00%                0,00%
+   Checks exitosos             100% (7200/7200)     100% (9000/9000)
+   VUs máximos utilizados      16                   22
 
-2. Resultados
-   - Total de peticiones: ____
-   - TPS alcanzado (http_reqs): ____
-   - Tiempo de respuesta: promedio ____ ms | p90 ____ ms | p95 ____ ms | máx. ____ ms
-   - Tasa de error (http_req_failed): ____ %
-   - Checks exitosos: ____ %
+3. VALIDACIÓN DE CRITERIOS
+   - TPS mínimo de 20: CUMPLE. La corrida 1 marcó 19,93/s por el promedio sobre
+     2m 0,4s (el ritmo configurado fue 20/s). Para dejar evidencia clara se
+     ejecutó la corrida 2, que alcanzó 24,94/s.
+   - Tiempo de respuesta máximo de 1,5 s: CUMPLE en ambas corridas. Ninguna
+     petición superó el límite.
+   - Tasa de error menor al 3%: CUMPLE. 0% de errores en ambas corridas.
+   - Validaciones funcionales (status 200/201 y token presente): CUMPLE al 100%.
 
-3. Validación de criterios
-   - TPS >= 20: CUMPLE / NO CUMPLE
-   - Tiempo de respuesta <= 1,5 s: CUMPLE / NO CUMPLE
-   - Error < 3%: CUMPLE / NO CUMPLE
+4. HALLAZGOS
+   - El servicio es estable: no hubo errores ni degradación al subir de 20 a 25 TPS.
+   - El tiempo mínimo de respuesta es de unos 300 ms y el promedio de unos 360 ms,
+     casi sin variación entre corridas. Esa base probablemente corresponde a la
+     latencia de red hacia el servidor y no al procesamiento del servicio.
+   - El tiempo máximo de la corrida 1 (1,42 s) fue un valor aislado: el p95 fue
+     de 484 ms. Aun así quedó cerca del límite de 1,5 s, por lo que conviene
+     vigilarlo en pruebas más largas.
+   - El número de VUs necesarios fue bajo (16 y 22 de 100 disponibles), lo que
+     indica que el servicio respondía rápido y había capacidad de sobra.
+   - Con solo 5 usuarios en rotación, es posible que parte de las respuestas se
+     beneficie de caché o de reglas del servicio. No se validó el comportamiento
+     con credenciales inválidas.
 
-4. Hallazgos
-   - ____
+5. LIMITACIONES
+   - El servicio es una API pública de demostración, por lo que los resultados
+     dependen de la red, la hora y la carga de terceros.
+   - La prueba se ejecutó desde un solo equipo y una sola ubicación.
+   - La duración (2 minutos) permite validar el cumplimiento de los criterios,
+     pero no detecta problemas que aparecen con el tiempo (fugas de memoria,
+     límites de la API por uso sostenido).
 
-5. Conclusiones y recomendaciones
-   - ____
+6. RECOMENDACIONES
+   - Ejecutar una prueba de estrés con carga creciente (ramping-arrival-rate)
+     para encontrar el punto en que el servicio empieza a degradarse.
+   - Ejecutar una prueba de resistencia (soak) de 30 a 60 minutos.
+   - Agregar un escenario negativo con credenciales inválidas (esperando 401)
+     y medir su tiempo de respuesta.
+   - Incorporar la prueba en el pipeline de CI/CD con los umbrales ya definidos
+     (p95 < 1,5 s, errores < 3%), de modo que falle automáticamente si se superan.
+   - Usar un volumen mayor de usuarios de prueba para evitar efectos de caché.
+
+7. CONCLUSIÓN GENERAL
+   El servicio de login cumple los criterios definidos (20 TPS, respuesta máxima
+   de 1,5 s y errores menores al 3%) con amplio margen: a 25 TPS el p95 fue de
+   416 ms y no hubo errores. Se considera apto para la carga evaluada. Para
+   conocer su límite real se recomienda complementar con pruebas de estrés y
+   de resistencia.
