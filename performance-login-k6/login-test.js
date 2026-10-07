@@ -7,7 +7,7 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
 
 // ---------- Parámetros (se pueden sobreescribir con -e VARIABLE=valor) ----------
 const BASE_URL = __ENV.BASE_URL || 'https://fakestoreapi.com';
-const TPS = parseInt(__ENV.TPS || '20');          // peticiones por segundo objetivo (mínimo exigido: 20)
+const TPS = parseInt(__ENV.TPS || '25');          // peticiones por segundo objetivo (mínimo exigido: 20)
 const DURATION = __ENV.DURATION || '2m';          // duración de la carga sostenida
 const MAX_RESPONSE_MS = 1500;                     // tiempo de respuesta máximo permitido
 const MAX_ERROR_RATE = 0.03;                      // tasa de error aceptable (< 3%)
