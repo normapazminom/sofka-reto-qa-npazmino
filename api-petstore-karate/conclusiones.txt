@@ -1,0 +1,59 @@
+CONCLUSIONES - PRUEBAS DE API REST CON KARATE (PETSTORE)
+API: https://petstore.swagger.io/v2
+
+1. EJECUCION
+   - Fecha: 07/10/2026 | Karate 2.1.2 | Java: OpenJDK 21.0.12.1 (Temurin) | SO: Windows 11
+   - Features: 1 | Escenarios ejecutados: 2 | Aprobados: 2 | Fallidos: 0
+   - Tiempo total: 6,46 s (1 hilo)
+
+2. RESULTADOS POR CASO
+   Caso                                          Respuesta   Tiempo     Resultado
+   Crear mascota (POST /pet)                     200         241 ms     Aprobado
+   Consultar por ID (GET /pet/{id})              200         151 ms     Aprobado
+   Actualizar a "sold" (PUT /pet)                200         152 ms     Aprobado
+   Consultar por status (GET /findByStatus)      200         244 ms     Aprobado
+   Mascota inexistente (GET /pet/999999999999)   404         106 ms     Aprobado
+
+   - La mascota creada tuvo id 1791412119744 (generado con la hora actual, distinto en cada corrida).
+   - En la consulta por status no se necesitaron reintentos: la mascota modificada
+     apareció en la primera consulta, con el nombre nuevo y status "sold".
+
+3. QUE SE VALIDO
+   - Status HTTP de cada llamada.
+   - Que el id, nombre y status devueltos coincidan con los enviados.
+   - En la consulta por ID, que el cuerpo completo (categoría, tags, fotos, status) sea igual al creado.
+   - Después del PUT, que nombre y status estén actualizados, y que la consulta por status
+     encuentre exactamente una mascota con ese id.
+   - Caso negativo: una mascota inexistente devuelve 404 con el mensaje "Pet not found".
+
+4. HALLAZGOS
+   - El flujo completo (crear, consultar, actualizar y buscar por status) funciona correctamente
+     y los datos se mantienen consistentes entre operaciones.
+   - Los tiempos de respuesta fueron bajos (entre 106 y 244 ms).
+   - La consulta por status devuelve todas las mascotas con ese estado de una API pública y
+     compartida, por lo que la respuesta es grande y puede variar. Por eso el test filtra por el id
+     propio en lugar de asumir el contenido de la lista.
+   - El servidor responde como Jetty 9.2.9 (versión de 2015), lo que confirma que es un servicio
+     de demostración y no un ambiente productivo.
+   - Detalle del test: el encabezado Accept se envió solo en la primera petición de cada
+     escenario, porque en Karate "header" aplica a la siguiente petición. Esto no afectó los
+     resultados.
+
+5. LIMITACIONES
+   - PetStore es una API pública y compartida: puede ser lenta, fallar de forma intermitente
+     o cambiar datos por el uso de otras personas.
+   - No se prueban autenticación, límites de tamaño ni validación de datos inválidos
+     (por ejemplo, un status que no exista o un cuerpo mal formado).
+
+6. RECOMENDACIONES
+   - Usar "configure headers" para enviar Accept y Content-Type en todas las peticiones.
+   - Agregar casos negativos: cuerpo inválido, status inexistente y eliminación de la mascota
+     (DELETE) al terminar para dejar los datos limpios.
+   - Validar el esquema de la respuesta (tipos de datos) además de los valores.
+   - Ejecutar en un pipeline CI/CD, apuntando a un ambiente propio en lugar de la API pública.
+   - Separar los pasos en escenarios reutilizables si el flujo crece.
+
+7. CONCLUSION GENERAL
+   Los cuatro casos solicitados y el caso negativo adicional pasaron sin fallas. La API
+   PetStore se comporta de forma consistente para el ciclo de vida de una mascota y la
+   automatización con Karate es reproducible con los pasos del README.
