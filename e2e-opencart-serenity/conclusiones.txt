@@ -1,0 +1,61 @@
+CONCLUSIONES - PRUEBA E2E OPENCART (SERENITY BDD + SCREENPLAY)
+Sitio: http://opencart.abstracta.us/ (redirige a https)
+
+1. EJECUCION
+   - Fecha: 09/10/2026, 18:20 | Serenity BDD 5.3.2 | Gradle 9.2.1 | Java: OpenJDK 21.0.12.1 (Temurin)
+   - Navegador: Google Chrome 154.0.8037.98 (64 bits) | SO: Windows 11
+   - Escenarios: 1 | Aprobados: 1 | Fallidos: 0 | Tiempo de la prueba: 28 s
+   - Comando: .\gradlew.bat test  (BUILD SUCCESSFUL)
+
+2. FLUJO AUTOMATIZADO Y RESULTADO
+   - Abrir la tienda: OK
+   - Agregar dos productos al carrito (MacBook e iPhone): OK, validando el mensaje de éxito de cada uno
+   - Visualizar el carrito: OK, validando que ambos productos aparezcan en la tabla
+   - Checkout como invitado (Guest Checkout) con datos de facturación: OK
+   - Aceptar método de envío y términos del método de pago: OK
+   - Confirmar el pedido y validar "Your order has been placed!": OK
+
+3. DISENO DE LA AUTOMATIZACION
+   - Escenario en Gherkin (BDD) con datos del cliente en una tabla, modificables sin tocar código.
+   - Patrón Screenplay: tareas (OpenTheStore, AddToCart, ViewTheCart, CheckoutAsGuest,
+     ConfirmTheOrder) sobre elementos definidos en la capa "ui".
+   - Esperas explícitas en cada paso que depende de ajax, sin pausas fijas.
+   - Reporte de Serenity con capturas de pantalla de cada acción (evidence/serenity-summary.html).
+
+4. HALLAZGOS Y DIFICULTADES ENCONTRADAS
+   - El encabezado de la página del carrito muestra el texto "Use Gift Certificate (10.00kg)"
+     en lugar de "Shopping Cart" (solo el título de la pestaña dice "Shopping Cart"). Por eso
+     un localizador basado en el texto fallaba. Se cambió a localizadores estructurales
+     (la tabla del carrito y el enlace del botón Checkout).
+   - La opción "Guest Checkout" se carga por ajax. Estaba presente y visible, pero Serenity
+     no la encontraba con un selector CSS de dos atributos. Se resolvió usando XPath.
+   - En el checkout aparecieron errores de clic interceptado (otro elemento tapaba el botón).
+     Se resolvió con clic por JavaScript en los botones y opciones del checkout.
+   - La región se carga por ajax después de elegir el país, por lo que se espera a que la
+     opción exista antes de seleccionarla.
+   - El navegador mostraba el aviso de traducción de Google; por precaución se desactivó en
+     la configuración de la prueba y se fijó el idioma en inglés.
+   - La demo es un sitio público que puede responder con lentitud variable; se usan esperas
+     de hasta 15 a 40 s según el paso.
+
+5. LIMITACIONES
+   - Se cubre un solo escenario (camino feliz) con dos productos fijos.
+   - No se validan precios, totales, impuestos ni el contenido del correo de confirmación.
+   - Cada ejecución crea un pedido real en la demo pública compartida.
+   - Los localizadores dependen de la estructura de la plantilla de OpenCart; un cambio en
+     la tienda podría romperlos.
+
+6. RECOMENDACIONES
+   - Agregar escenarios negativos: campos obligatorios vacíos, correo inválido, carrito vacío.
+   - Validar totales del carrito y del pedido (subtotal, envío, total).
+   - Parametrizar los productos con Scenario Outline y probar también registro e inicio de sesión.
+   - Pedir al equipo de desarrollo identificadores de prueba estables (por ejemplo atributos
+     data-testid) para no depender de textos ni de la estructura.
+   - Ejecutar en un pipeline CI/CD con el modo sin ventana (-Dheadless.mode=true) y publicar
+     el reporte de Serenity como artefacto.
+
+7. CONCLUSION GENERAL
+   El flujo completo de compra como invitado, desde agregar dos productos hasta la
+   confirmación "Your order has been placed!", quedó automatizado y aprobado con Serenity BDD
+   y Screenplay. La ejecución es reproducible con un solo comando y genera un reporte con
+   evidencia.
